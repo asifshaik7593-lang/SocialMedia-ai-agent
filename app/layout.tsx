@@ -2,8 +2,8 @@ import "./globals.css";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Next.js Premium Startup Boilerplate",
-  description: "Created using the ultimate interactive Next.js stack generator CLI.",
+  title: "Socially — your social media workspace",
+  description: "Plan, create, and grow your social presence from one focused workspace.",
 };
 
 export default function RootLayout({
