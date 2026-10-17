@@ -1,14 +1,16 @@
 import { redirect } from 'next/navigation';
-import { ArrowUpRight, CalendarDays, ChartNoAxesCombined, CircleUserRound, Clock3, Sparkles, WandSparkles } from 'lucide-react';
+import { ArrowUpRight, CalendarDays, ChartNoAxesCombined, CircleUserRound, Clock3, LogOut, Sparkles, WandSparkles } from 'lucide-react';
 import { signOutAction } from '@/app/auth/actions';
 import { createInsforgeServerClient } from '@/lib/insforge/server';
 import { ensureUserProfile } from '@/lib/insforge/profiles';
+import { getUserCampaign } from '@/lib/insforge/campaigns';
 
 export default async function DashboardPage() {
   const client = await createInsforgeServerClient();
   const { data } = await client.auth.getCurrentUser();
   const user = data?.user;
   if (!user) redirect('/sign-in');
+  if (!(await getUserCampaign(client, user.id))) redirect('/create-campaign');
 
   await ensureUserProfile(client, user);
   const { data: profile } = await client.database.from('profiles').select('email, name, avatar_url, provider, created_at').eq('id', user.id).maybeSingle();
@@ -22,7 +24,7 @@ export default async function DashboardPage() {
         <a className="side-item active" href="/dashboard"><ChartNoAxesCombined size={17} /> Overview</a>
         <a className="side-item" href="#calendar"><CalendarDays size={17} /> Content calendar <span className="side-soon">SOON</span></a>
         <a className="side-item" href="#create"><WandSparkles size={17} /> AI studio <span className="side-soon">SOON</span></a>
-        <div className="sidebar-bottom"><div className="sidebar-plan"><Sparkles size={15} /><span><b>Your next chapter</b><small>Starts with one good post.</small></span></div><div className="sidebar-user"><span className="user-avatar">{displayName.slice(0, 1).toUpperCase()}</span><span><b>{displayName}</b><small>{profile?.email || user.email}</small></span><form action={signOutAction}><button className="signout-button" type="submit" aria-label="Sign out" title="Sign out"><ArrowUpRight size={16} /></button></form></div></div>
+        <div className="sidebar-bottom"><div className="sidebar-plan"><Sparkles size={15} /><span><b>Your next chapter</b><small>Starts with one good post.</small></span></div><div className="sidebar-user"><span className="user-avatar">{displayName.slice(0, 1).toUpperCase()}</span><span><b>{displayName}</b><small>{profile?.email || user.email}</small></span><form action={signOutAction}><button className="signout-button" type="submit"><LogOut size={16} /><span>Log out</span></button></form></div></div>
       </aside>
       <section className="dashboard-main">
         <header className="dashboard-topbar"><div><span className="eyebrow auth-eyebrow">YOUR WORKSPACE</span><span className="workspace-status"><i /> ALL SYSTEMS READY</span></div><div className="top-user"><span>{profile?.email || user.email}</span><span className="user-avatar small-avatar">{displayName.slice(0, 1).toUpperCase()}</span></div></header>
