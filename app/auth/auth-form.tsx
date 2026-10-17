@@ -32,7 +32,7 @@ export function AuthForm({ mode, providers, initialError }: { mode: 'sign-in' | 
         setMessage('Your account is ready. Enter the 6-digit code we sent to your email.');
         return;
       }
-      router.replace('/dashboard');
+      router.replace(result.redirectTo ?? '/create-campaign');
       router.refresh();
     });
   }
@@ -44,7 +44,7 @@ export function AuthForm({ mode, providers, initialError }: { mode: 'sign-in' | 
     startTransition(async () => {
       const result = await verifySignupCodeAction(verificationEmail, code);
       if (!result.ok) { setError(result.error); return; }
-      router.replace('/dashboard');
+      router.replace(result.redirectTo ?? '/create-campaign');
       router.refresh();
     });
   }

@@ -4,8 +4,9 @@ import { createAuthActions, createServerClient } from '@insforge/sdk/ssr';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { ensureUserProfile, type AuthUser } from '@/lib/insforge/profiles';
+import { getCampaignDestination } from '@/lib/insforge/campaigns';
 
-type ActionResult = { ok: true; verificationRequired?: boolean; email?: string } | { ok: false; error: string };
+type ActionResult = { ok: true; verificationRequired?: boolean; email?: string; redirectTo?: string } | { ok: false; error: string };
 
 const getString = (formData: FormData, key: string) => String(formData.get(key) ?? '').trim();
 
@@ -35,7 +36,8 @@ export async function signUpAction(formData: FormData): Promise<ActionResult> {
     }
   }
 
-  return { ok: true };
+  const client = createServerClient({ cookies: await cookies() });
+  return { ok: true, redirectTo: data?.user ? await getCampaignDestination(client, data.user.id) : '/sign-in' };
 }
 
 export async function verifySignupCodeAction(email: string, code: string): Promise<ActionResult> {
@@ -49,7 +51,8 @@ export async function verifySignupCodeAction(email: string, code: string): Promi
     return { ok: false, error: profileError instanceof Error ? profileError.message : 'Could not save your profile.' };
   }
 
-  return { ok: true };
+  const client = createServerClient({ cookies: await cookies() });
+  return { ok: true, redirectTo: await getCampaignDestination(client, data.user.id) };
 }
 
 export async function resendSignupCodeAction(email: string): Promise<ActionResult> {
@@ -73,7 +76,7 @@ export async function signInAction(formData: FormData): Promise<ActionResult> {
     return { ok: false, error: profileError instanceof Error ? profileError.message : 'Could not save your profile.' };
   }
 
-  return { ok: true };
+  return { ok: true, redirectTo: await getCampaignDestination(createServerClient({ cookies: await cookies() }), data.user.id) };
 }
 
 const oauthProviders = new Set(['google', 'github', 'microsoft']);

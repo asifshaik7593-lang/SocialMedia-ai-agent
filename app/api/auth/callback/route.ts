@@ -1,6 +1,7 @@
 import { createAuthActions, createServerClient } from '@insforge/sdk/ssr';
 import { NextRequest, NextResponse } from 'next/server';
 import { ensureUserProfile, type AuthUser } from '@/lib/insforge/profiles';
+import { getCampaignDestination } from '@/lib/insforge/campaigns';
 
 export async function GET(request: NextRequest) {
   const code = request.nextUrl.searchParams.get('insforge_code');
@@ -23,6 +24,7 @@ export async function GET(request: NextRequest) {
   try {
     const client = createServerClient({ accessToken });
     await ensureUserProfile(client, data.user as AuthUser);
+    response.headers.set('Location', new URL(await getCampaignDestination(client, data.user.id), request.url).toString());
   } catch {
     return NextResponse.redirect(new URL('/sign-in?error=profile_failed', request.url));
   }

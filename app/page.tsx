@@ -2,11 +2,12 @@ import Link from 'next/link';
 import { ArrowRight, CalendarDays, ChartNoAxesCombined, Sparkles, WandSparkles } from 'lucide-react';
 import { createInsforgeServerClient } from '@/lib/insforge/server';
 import { redirect } from 'next/navigation';
+import { getCampaignDestination } from '@/lib/insforge/campaigns';
 
 export default async function Home() {
   const client = await createInsforgeServerClient();
   const { data } = await client.auth.getCurrentUser();
-  if (data?.user) redirect('/dashboard');
+  if (data?.user) redirect(await getCampaignDestination(client, data.user.id));
 
   return (
     <main className="landing-page">
